@@ -23,8 +23,13 @@ You typically init Loggliest in your MainActivity's `onCreate()` or in an Applic
 
 Log a message:
 ```java
-Loggly.i("stringfield", "test"); 
-Loggly.i("numberfield", 123);
+Loggly.i("stringField", "test"); // String
+Loggly.i("integerField", 123); // Integer
+Loggly.i("longField", 123456789); //Long
+Loggly.i("booleanField", true); // Boolean
+Loggly.i("doubleField", 12.01F); // Double
+Loggly.i("jsonField", jsonObject); // JSONObject as the value of jsonField
+Loggly.i(jsonObject); // jsonObject properties merged into Loggly event
 ```
 Log messages are formatted as json messages as expected by Loggly. Along with the json field and value provided by calling one of the log functions, a "level" field is appended with the current log level (verbose, debug, info, warning, error), and a "timestamp" set according to when the message was logged. Also, a set of various default fields can be appended, including app version name and number.
 
@@ -34,6 +39,8 @@ The log messages are saved in the internal app storage and uploaded to Loggly in
 2. The number of log messages since the last upload exceeds the `uploadIntervalLogCount(int count)` setting
 3. A new `Loggly` instance is created and there are (old) messages that have not previously been uploaded. This will happen for instance when the app is killed and the user restarts it some time later
 4. `forceUpload()` is called
+
+In addition to add a single key
 
 A typical configuration that sets upload intervals to 30mins, max number of messages between uploads to 1000 messages, limits the internal app storage log buffer to 500k and appends the default info fields along with a custom language field looks like this:
 

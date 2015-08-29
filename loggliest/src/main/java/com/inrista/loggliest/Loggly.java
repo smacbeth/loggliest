@@ -38,6 +38,7 @@ import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -395,7 +396,7 @@ public class Loggly {
         mThread.start();
     }
         
-    private static void log(JSONObject jsonObject) {
+    private static void offer(JSONObject jsonObject) {
         if(!mThread.isAlive())
             start();
         
@@ -408,10 +409,39 @@ public class Loggly {
             json.put("timestamp", time);
             json.put("level", level);
             json.put(key, msg);
-            log(json);
+
+            offer(json);
         } catch (JSONException e) {}
     }
-    
+
+    private static void log(JSONObject msg, String level, long time) {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("timestamp", time);
+            json.put("level", level);
+
+            Iterator<String> it = msg.keys();
+
+            while (it.hasNext()) {
+                final String key = it.next();
+                json.put(key, msg.get(key));
+            }
+
+            offer(json);
+        } catch (JSONException e) {}
+    }
+
+
+
+    /**
+     * Log a verbose message.
+     * @param msg The log message, a JSONObject
+     */
+    public static void v(JSONObject msg) {
+        log(msg, "verbose", System.currentTimeMillis());
+    }
+
+
     /**
      * Log a verbose message.
      * @param key Loggly json field
@@ -433,6 +463,15 @@ public class Loggly {
 
     /**
      * Log a debug message.
+     * @param msg The log message, a JSONObject
+     */
+    public static void d(JSONObject msg) {
+        log(msg, "debug", System.currentTimeMillis());
+    }
+
+
+    /**
+     * Log a debug message.
      * @param key Loggly json field
      * @param msg The log message, either a JSONObject, String, Boolean, Integer, Long or Double
      */    
@@ -449,7 +488,15 @@ public class Loggly {
     public static void d(String key, String msg, Throwable tr) {
         d(key, msg + '\n' + Log.getStackTraceString(tr));
     }
-    
+
+    /**
+     * Log an info message.
+     * @param msg The log message, a JSONObject
+     */
+    public static void i(JSONObject msg) {
+        log(msg, "info", System.currentTimeMillis());
+    }
+
     /**
      * Log an info message.
      * @param key Loggly json field
@@ -471,6 +518,14 @@ public class Loggly {
 
     /**
      * Log a warning message.
+     * @param msg The log message, a JSONObject
+     */
+    public static void w(JSONObject msg) {
+        log(msg, "warning", System.currentTimeMillis());
+    }
+
+    /**
+     * Log a warning message.
      * @param key Loggly json field
      * @param msg The log message, either a JSONObject, String, Boolean, Integer, Long or Double
      */        
@@ -487,7 +542,15 @@ public class Loggly {
     public static void w(String key, String msg, Throwable tr) {
         w(key, msg + '\n' + Log.getStackTraceString(tr));
     }
-    
+
+    /**
+     * Log an error message.
+     * @param msg The log message, a JSONObject
+     */
+    public static void e(JSONObject msg) {
+        log(msg, "error", System.currentTimeMillis());
+    }
+
     /**
      * Log an error message.
      * @param key Loggly json field
@@ -533,7 +596,7 @@ public class Loggly {
             json.put(UPDATE_STICKY_INFO_MSG, true);
             json.put("key", key);
             json.put("msg", msg);
-            log(json);
+            offer(json);
         } catch (JSONException e) {}
     }
     
